@@ -1,8 +1,7 @@
 import copy
-
 class Node:
-    def out(self):
-        print ', '.join(self.state[0]) + " \~~~~~~~~~~~/ " + ', '.join(self.state[1])
+    def __str__(self):
+        return ', '.join(self.state[0]) + " \~~~~~~~~~~~/ " + ', '.join(self.state[1])
 
     def __eq__(self, other):
         if self.state == other.state:
@@ -16,13 +15,12 @@ class Node:
     def farmerLocation(self):
         return 0 if 'F' in self.state[0] else 1
 
-    #Find possible next states
     def children(self):
         children = []
         farmerBank = self.farmerLocation()
         oppositeBank = 1 if farmerBank == 0 else 0
 
-        for actor in self.state[farmerBank]: #A non-farmer actor can only cross when the farmer is one the same side as them
+        for actor in self.state[farmerBank]: #A non-farmer actor can only cross when the farmer is on the same side as them
             child = Node(self)
             #Farmer always moves to the opposite side, no matter whether he brings an actor with him or not
             child.state[farmerBank].remove('F')
@@ -46,7 +44,6 @@ def valid(node):
 
 def dfs(node, path, depth):
     path.append(node)
-
     if finished(node):
         return [path]
 
@@ -63,16 +60,8 @@ paths = dfs(n, [], 10)
 for path in paths:
     print "\nPath: "
     for node in path:
-        node.out()
+        print node
 
-
-#Notes:
-#Infinite recursion would require setting a max depth or checking parents when returning children (weed out duplicates), if not comparing actual state, but only the node itself. 
-#Problem: not really a node anymore like this; nodes are compared on state as opposed to state + parent
-#Currently not finding the same node anyways, only the same state in different nodes. 
-#Comparing actual nodes (parent and all) sounds like it's only relevant when graph is already made beforehand - you won't create matches recursively
-
-#Cache not as nice as it could be right now; checks whether pattern occured higher up in path, but not on another branch in the tree
 
 
         
