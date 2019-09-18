@@ -4,8 +4,9 @@ class Node:
         return ', '.join(self.state[0]) + " \~~~~~~~~~~~/ " + ', '.join(self.state[1])
 
     def __eq__(self, other):
-        if self.state == other.state:
-            return True
+        if isinstance(other, Node):
+            if self.state == other.state:
+                return True
         return False
 
     def __init__(self, parent):
@@ -58,9 +59,9 @@ def dfs(node, path, depth):
 n = Node(None)
 paths = dfs(n, [], 10)
 for path in paths:
-    print "\nPath: "
+    print("\nPath: ")
     for node in path:
-        print node
+        print(node)
 
 
 
