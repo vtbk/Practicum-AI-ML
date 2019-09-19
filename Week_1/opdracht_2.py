@@ -7,7 +7,7 @@ class State:
         self.board, self.selected = board, copy.deepcopy(selected)
     
     def selected_string(self):
-        return ''.join(self.board[select[0]][select[1]] for select in self.selected) #Constructs the currently selected string by combining the letters of each selected cell
+        return ''.join(self.board[select[0]][select[1]] for select in self.selected)
 
     def new_index(self, index, boundary, mutation): 
         if index + mutation > boundary:
@@ -28,11 +28,11 @@ class State:
                 ancestors.append(State(self.board, updated_selected))
         return ancestors
 
-def generate_prefix_list(words):
-    prefixes = []
+def generate_prefix_set(words):
+    prefixes = set()
     for word in words:
         for i in range(1, len(word)):
-            prefixes.append(word[:i])
+            prefixes.add(word[:i])
     return prefixes
 
 def dfs(state, prefixes, words):
@@ -50,7 +50,7 @@ def dfs(state, prefixes, words):
 
 def solve(board, words):
     found = []
-    prefixes = generate_prefix_list(words)
+    prefixes = generate_prefix_set(words)
     for x in range(0, len(board)):
         for y in range (0, len(board[x])):
             state = State(board, [[x,y]]) #Create a state where this cell is the first one selected
@@ -61,6 +61,6 @@ def solve(board, words):
 
 board = [['B', 'D', 'G', 'O'], ['O', 'E', 'N', 'M'], ['T', 'R', 'U', 'P'], ['I', 'X', 'Y', 'W']]
 with open("words.txt", "r") as f:
-    words = f.read().splitlines()
-print solve(board, words)
+    words = set(f.read().splitlines())
+print(solve(board, words))
 
