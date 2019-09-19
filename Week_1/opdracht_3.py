@@ -2,26 +2,31 @@ from heapq import heappush
 from heapq import heappop
 from collections import namedtuple
 from copy import deepcopy
+import cProfile
 class State:
+    coordinate = namedtuple('Coordinate', 'x y')
+
+    def __hash__(self):
+        return hash(str(self.board))
+
     def __eq__(self, other):
-        if isinstance(other, State ) and self.board == other.board:
+        if isinstance(other, State) and self.board == other.board:
             return True
         return False
 
-    def __repr__(self):
-        repr = '\n'
-        for row in range(0, self.length):
-            for col in range(0, self.length):
-                repr += str(self.board[col][row])
-            repr += "\n"
-        return repr
+    def __repr__(self): #Yuck! TODO: Change board representation from board[x][y] to board[y][x]; will turn this into a simple str join.
+        temp = ''
+        for x in range(0, self.length):
+            for y in range(0, self.length):
+                temp += str(self.board[y][x]) + " "
+            temp += '\n'
+        return temp
 
     def __lt__(self, other): return True
 
     def __init__(self, board, previous = None, depth = 0):
         self.board, self.previous, self.depth = board, previous, depth
         self.length = len(board)
-        self.coordinate = namedtuple('Coordinate', 'x y')
 
     def around(self, coordinate):
         coords = []
@@ -36,8 +41,8 @@ class State:
         return coords
     
     def coords_of(self, value):
-        for x, row in enumerate(self.board):
-            for y, col in enumerate(row):
+        for x in range(0, self.length):
+            for y in range(0, self.length):
                 if self.board[x][y] == value:
                     return self.coordinate(x, y)
 
@@ -60,34 +65,44 @@ class Solver:
         
     def solve(self, current_state, desired_state):
         frontier = []
-        visited = []
+        visited = set()
         heappush(frontier, (0, current_state))
+
         while len(frontier) > 0:
             current = heappop(frontier)[1]
             if current == desired_state:
                 return current
-            visited.append(current)
+            visited.add(current)
             for ancestor in current.ancestors():
                 if ancestor not in visited:
                     heappush(frontier, (self.heuristic(ancestor, desired_state) + ancestor.depth, ancestor))
 
 
+#---------------------#
+#Solver requires injection of heuristic function
 def heuristic(current_state, desired_state):
     total = 0
-    for x, row in enumerate(current_state.board):
-        for y, val in enumerate(row):
+    for x in range(0, current_state.length):
+        for y in range(0, current_state.length):
+            val = current_state.board[x][y]
             desired_location = desired_state.coords_of(val)
             total += abs(x - desired_location.x) + abs(y - desired_location.y)
     return total
 
+#Useless heuristic to demonstrate inefficiency of Dijkstra
+def mocked_heuristic(current_state, desired_state):
+    return 0
+
+
+board = [[8, 2, 3], [6, 5, 0], [7, 4, 1]]
+desired = [[1, 4, 7], [2, 5, 8], [3, 6, 0]]
 
 solver = Solver(heuristic)
-board, desired = [[1, 4, 7], [2, 0, 8], [3, 5, 6]], [[1, 4, 7], [2, 5, 8], [3, 6, 0]] #Board is a multidimensional array
+solution = solver.solve(State(board), State(desired))
+print("Solution found at depth: " + str(solution.depth))
 
-r = solver.solve(State(board), State(desired))
-
-print("Winning: ")
-while r != None:
-    print(r)
-    r = r.previous
-#maybe set parent on state so that you can get the actual path instead of just the amout of steps
+state = solution
+while state.previous != None:
+    print("Move #" + str(state.depth))
+    print(state)
+    state = state.previous
