@@ -2,7 +2,6 @@ from heapq import heappush
 from heapq import heappop
 from collections import namedtuple
 from copy import deepcopy
-import cProfile
 class State:
     coordinate = namedtuple('Coordinate', 'x y')
 
@@ -77,7 +76,6 @@ class Solver:
                 if ancestor not in visited:
                     heappush(frontier, (self.heuristic(ancestor, desired_state) + ancestor.depth, ancestor))
 
-
 #---------------------#
 #Solver requires injection of heuristic function
 def heuristic(current_state, desired_state):
@@ -92,7 +90,6 @@ def heuristic(current_state, desired_state):
 #Useless heuristic to demonstrate inefficiency of Dijkstra
 def mocked_heuristic(current_state, desired_state):
     return 0
-
 
 board = [[8, 2, 3], [6, 5, 0], [7, 4, 1]]
 desired = [[1, 4, 7], [2, 5, 8], [3, 6, 0]]
