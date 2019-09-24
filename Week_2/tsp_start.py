@@ -70,5 +70,39 @@ def nearest_neighbour(cities):
         cities.discard(sorted_cities[0])
     return tour
 
-cities = make_cities(500)
-plot_tsp(nearest_neighbour, cities)
+def swap(tour, i, k): #https://en.wikipedia.org/wiki/2-opt
+    new_tour = []
+    new_tour += tour[0:i]
+    middle_segment = tour[i:k + 1]
+    middle_segment.reverse()
+    new_tour += middle_segment
+    new_tour += tour[k + 1:]
+    return new_tour
+
+def optimise(tour): #TODO Fix awful performance for larger tours (caused for the most part by the overusage of tour_length() calls)
+    improved = True
+    best_length = tour_length(tour)
+    while improved:
+        improved = False
+        for i in range(0, len(tour) - 2):
+            for k in range(i + 2, len(tour) - 2):
+                new_tour = swap(tour, i, k)
+                new_length = tour_length(new_tour)
+                if new_length < best_length:
+                    best_length = new_length
+                    tour = new_tour
+                    improved = True
+    return tour
+
+cities = make_cities(40)
+tour = nearest_neighbour(cities)
+optimalised = optimalise(tour)
+print("Original cost: " + str(tour_length(tour)))
+print("New cost: " + str(tour_length(optimalised)))
+plot_tour(tour)
+plot_tour(optimalised)
+
+
+#References:
+#http://on-demand.gputechconf.com/gtc/2014/presentations/S4534-high-speed-2-opt-tsp-solver.pdf
+#https://arthur.maheo.net/python-local-tsp-heuristics/
