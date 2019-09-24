@@ -96,11 +96,11 @@ def optimise(tour): #TODO Fix awful performance for larger tours (caused for the
 
 cities = make_cities(40)
 tour = nearest_neighbour(cities)
-optimalised = optimalise(tour)
+optimised = optimise(tour)
 print("Original cost: " + str(tour_length(tour)))
 print("New cost: " + str(tour_length(optimalised)))
 plot_tour(tour)
-plot_tour(optimalised)
+plot_tour(optimised)
 
 
 #References:
