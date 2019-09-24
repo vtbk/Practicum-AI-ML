@@ -98,7 +98,7 @@ cities = make_cities(40)
 tour = nearest_neighbour(cities)
 optimised = optimise(tour)
 print("Original cost: " + str(tour_length(tour)))
-print("New cost: " + str(tour_length(optimalised)))
+print("New cost: " + str(tour_length(optimised)))
 plot_tour(tour)
 plot_tour(optimised)
 
