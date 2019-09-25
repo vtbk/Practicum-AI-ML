@@ -207,19 +207,22 @@ def random_strategy(player, board):
 
 def negamax_strategy(player, board):
     state = Node(board[:], player)
-    scored_nodes = [negamax(child) for child in state.get_children()]
-    best = max(scored_nodes, key=lambda x: -x.val)
+    scored_nodes = [negamax(child, -math.inf, math.inf) for child in state.get_children()] 
+    best = max(scored_nodes, key=lambda x: -x.val) 
     return best.node.move
 
-def negamax(node, depth = 3):
+def negamax(node, alpha, beta, depth = 3):
     if depth < 1 or next_player(node.board, node.player) == None:
         value = score(node.player, node.board)
         return scored_node(value, node)
     
     max_value = -math.inf
     for child in node.get_children():
-        value = -negamax(child, depth - 1)[0]
-        max_value = max_value if max_value > value else value
+        value = -negamax(child, -beta, -alpha, depth - 1).val
+        max_value = max([max_value, value])
+        alpha = max([max_value, alpha])
+        if alpha >= beta:
+            break
     return scored_node(max_value, node)
 
 class Node:
@@ -240,4 +243,3 @@ class Node:
 
 r = play(negamax_strategy, negamax_strategy)
 print(print_board(r))
-
