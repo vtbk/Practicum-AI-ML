@@ -1,4 +1,7 @@
 import random
+import math
+from copy import deepcopy
+from collections import namedtuple
 """
 
 Othello is a turn-based two-player strategy board game.
@@ -29,11 +32,13 @@ This representation has two useful properties:
 2. Operations involving bounds checking are slightly simpler.
 """
 
+
 # The outside edge is marked ?, empty squares are ., black is @, and white is o.
 # The black and white pieces represent the two players.
 EMPTY, BLACK, WHITE, OUTER = '.', '@', 'o', '?'
 PIECES = (EMPTY, BLACK, WHITE, OUTER)
 PLAYERS = {BLACK: 'Black', WHITE: 'White'}
+scored_node = namedtuple('scored_node', 'val node')
 
 # To refer to neighbor squares we can add a direction to a square.
 UP, DOWN, LEFT, RIGHT = -10, 10, -1, 1
@@ -163,15 +168,20 @@ def any_legal_move(player, board):
 
 def play(black_strategy, white_strategy):
     # play a game of Othello and return the final board and score
+    moves = 0
     board = initial_board()
     prev = BLACK
     while next_player(board, prev) != None: #Would rather not call next_player() twice, maybe look into this
         player = next_player(board, prev)
         strat = black_strategy if player == BLACK else white_strategy
         move = get_move(strat, player, board)
+        print(move)
         make_move(move, player, board)
         prev = player
+        moves += 1
+    print(moves)
     return board
+    
 
 def next_player(board, prev_player):
     # which player should move next?  Returns None if no legal moves exist
@@ -183,19 +193,51 @@ def next_player(board, prev_player):
     else:
         return None
 
-def get_move(strategy, player, board): #Function seems to be awfully useless, but came with the starting template, so I did not remove it
-    # call strategy(player, board) to get a move
+def score(player, board):
+    return len(list(filter(lambda tile: tile == player, board)))
+
+def get_move(strategy, player, board): 
+    #Function seems to be awfully useless, but came with the starting template, so I did not remove it
+    #call strategy(player, board) to get a move
     return strategy(player, board)
 
-def score(player, board):
-    # compute player's score (number of player's pieces minus opponent's)
-    return
-# Play strategies
-
-def random_strat(player, board):
+def random_strategy(player, board):
     moves = legal_moves(player, board)
-    i = random.randint(0, len(moves) - 1)
-    return moves[i]
+    return moves[random.randint(0, len(moves) - 1)]
 
-finished_board = play(random_strat, random_strat) 
-print(print_board(finished_board))
+def negamax_strategy(player, board):
+    state = Node(board[:], player)
+    scored_nodes = [negamax(child) for child in state.get_children()]
+    best = max(scored_nodes, key=lambda x: -x.val)
+    return best.node.move
+
+def negamax(node, depth = 3):
+    if depth < 1 or next_player(node.board, node.player) == None:
+        value = score(node.player, node.board)
+        return scored_node(value, node)
+    
+    max_value = -math.inf
+    for child in node.get_children():
+        value = -negamax(child, depth - 1)[0]
+        max_value = max_value if max_value > value else value
+    return scored_node(max_value, node)
+
+class Node:
+    def __init__(self, board, player, move = None, parent = None):
+        self.board = board
+        self.player = player #Player about to make a move
+        self.move = move #Represents move played to get to this state
+        self.parent = parent
+
+    def get_children(self):
+        children = []
+        for move in legal_moves(self.player, self.board):
+            new_board = self.board[:]
+            make_move(move, self.player, new_board)
+            child = Node(new_board, next_player(new_board, self.player), move, self)
+            children.append(child)
+        return children
+
+r = play(negamax_strategy, negamax_strategy)
+print(print_board(r))
+
