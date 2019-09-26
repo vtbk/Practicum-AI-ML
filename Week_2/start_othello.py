@@ -168,18 +168,14 @@ def any_legal_move(player, board):
 
 def play(black_strategy, white_strategy):
     # play a game of Othello and return the final board and score
-    moves = 0
     board = initial_board()
     prev = BLACK
     while next_player(board, prev) != None: #Would rather not call next_player() twice, maybe look into this
         player = next_player(board, prev)
         strat = black_strategy if player == BLACK else white_strategy
         move = get_move(strat, player, board)
-        print(move)
         make_move(move, player, board)
         prev = player
-        moves += 1
-    print(moves)
     return board
     
 
@@ -194,7 +190,7 @@ def next_player(board, prev_player):
         return None
 
 def score(player, board):
-    return len(list(filter(lambda tile: tile == player, board)))
+    return len(legal_moves(player, board))
 
 def get_move(strategy, player, board): 
     #Function seems to be awfully useless, but came with the starting template, so I did not remove it
@@ -211,7 +207,7 @@ def negamax_strategy(player, board):
     best = max(scored_nodes, key=lambda x: -x.val) 
     return best.node.move
 
-def negamax(node, alpha, beta, depth = 3):
+def negamax(node, alpha, beta, depth = 2):
     if depth < 1 or next_player(node.board, node.player) == None:
         value = score(node.player, node.board)
         return scored_node(value, node)
@@ -241,5 +237,5 @@ class Node:
             children.append(child)
         return children
 
-r = play(negamax_strategy, negamax_strategy)
-print(print_board(r))
+finished_board = play(negamax_strategy, random_strategy)
+print(print_board(finished_board))
