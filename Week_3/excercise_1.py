@@ -1,6 +1,6 @@
 import itertools
 
-inhabitants = ('L', 'M', 'N', 'E', 'J')
+residents = ('L', 'M', 'N', 'E', 'J')
 
 constraints = []
 constraints.append(lambda floors: floors[4] != 'L')
@@ -17,7 +17,7 @@ def verify_floors(floors):
     return True
 
 def solve():
-    for floors in list(itertools.permutations(inhabitants)):
+    for floors in list(itertools.permutations(residents)):
         if verify_floors(floors): 
             return floors
 
