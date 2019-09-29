@@ -15,7 +15,7 @@ def is_valid_board(board):
         neighbour_cards = [board[neighbour] for neighbour in neighbours[index]]
         if card == EMPTY:
             continue
-        
+
         if card in neighbour_cards:
             return False
 
@@ -64,8 +64,6 @@ def tests():
     print(not is_valid_board(['K', 'J', 'J', 'Q', 'Q', 'K', 'A', 'A']))
     print(is_valid_board(['K', 'Q', 'J', 'Q', 'A', 'K', 'J', 'A']))
 
-board = []
-for i in range(0, 8):
-    board.append(EMPTY)
+board = [EMPTY for tile in range(8)]
 print(search(board, [JACK, JACK, KING, KING, QUEEN, QUEEN, ACE, ACE]))
 
