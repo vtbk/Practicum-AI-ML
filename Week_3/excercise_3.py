@@ -84,23 +84,43 @@ def solve(grid):
     return dfs(grid)
 
 def get_empty_cells(grid):
-    return [index for index, value in grid.items() if value == digits]
+    return [index for index, value in grid.items() if len(value) > 1]
 
-def dfs(grid, index = 0):
-    if digits not in grid.values():
+def dfs(grid):
+    empty_cells = get_empty_cells(grid)
+    if not empty_cells:
         return grid
 
-    #for cell in get_empty_cells(grid):
-    cell = get_empty_cells(grid)[0]
-    for digit in range(1, 10):
-        if no_conflict(grid, cell, str(digit)):
-            grid[cell] = str(digit)
-            result = dfs(grid)            
-            if result != False:
-                return result
-            else:
-                grid[cell] = digits
+    cell = empty_cells.pop()
+
+    for digit in list(grid[cell]):
+        if no_conflict(grid, cell, digit):
+            new_grid = grid.copy()
+            new_grid[cell] = digit
+            if make_arc_consistent(new_grid, cell, digit):
+                result = dfs(new_grid)            
+                if result != False:
+                    return result
     return False
+
+def make_arc_consistent(grid, cell, value):
+    changed = False
+    for peer in peers[cell]:
+        if value in grid[peer]:
+            if len(grid[peer]) <= 1:
+                return False
+            grid[peer] = grid[peer].replace(value, '')
+            changed = True
+
+    if not changed:
+        return True
+
+    single_value_cells = [other_cell for other_cell, value in grid.items() if len(value) == 1 and other_cell != cell]
+
+    for ccell in single_value_cells:
+        if make_arc_consistent(grid, ccell, grid[ccell]) == False:
+            return False
+    return True
 
 # minimum nr of clues for a unique solution is 17
 slist = [None for x in range(20)]
@@ -125,16 +145,24 @@ slist[17]= '..5...987.4..5...1..7......2...48....9.1.....6..2.....3..6..2.......
 slist[18]= '3.6.7...........518.........1.4.5...7.....6.....2......2.....4.....8.3.....5.....'
 slist[19]= '1.....3.8.7.4..............2.3.1...........958.........5.6...7.....8.2...4.......'
 
+
+
+grid = parse_string_to_dict(slist[2])
+
+display(grid)
+r = solve(grid)
+print(r)
+display(r)
+exit()
+
+
 for i,sudo in enumerate(slist):
     print('*** sudoku {0} ***'.format(i))
     print(sudo)
-    #display(parse_string_to_dict(sudo))
     d = parse_string_to_dict(sudo)
     start_time = time.time()
     r = solve(d)
     display(r)
-    print(get_empty_cells(r))
-    
     end_time = time.time()
     hours, rem = divmod(end_time-start_time, 3600)
     minutes, seconds = divmod(rem, 60)
