@@ -80,7 +80,6 @@ def no_conflict(grid, c, v):
 
 def solve(grid):
     # backtracking search a solution (DFS)
-    # your code here
     return dfs(grid)
 
 def get_empty_cells(grid):
@@ -88,17 +87,16 @@ def get_empty_cells(grid):
 
 def dfs(grid):
     empty_cells = get_empty_cells(grid)
-    if not empty_cells:
+    if not empty_cells: 
         return grid
 
     cell = empty_cells.pop()
-
     for digit in list(grid[cell]):
-        if no_conflict(grid, cell, digit):
+        if no_conflict(grid, cell, digit): 
             new_grid = grid.copy()
             new_grid[cell] = digit
             if make_arc_consistent(new_grid, cell, digit):
-                result = dfs(new_grid)            
+                result = dfs(new_grid)  
                 if result != False:
                     return result
     return False
@@ -106,19 +104,19 @@ def dfs(grid):
 def make_arc_consistent(grid, cell, value):
     changed = False
     for peer in peers[cell]:
-        if value in grid[peer]:
-            if len(grid[peer]) <= 1:
+        peer_values = grid[peer]
+        if value in peer_values:
+            if len(peer_values) <= 1:
                 return False
-            grid[peer] = grid[peer].replace(value, '')
+            grid[peer] = peer_values.replace(value, '')
             changed = True
-
+    
     if not changed:
         return True
 
-    single_value_cells = [other_cell for other_cell, value in grid.items() if len(value) == 1 and other_cell != cell]
-
-    for ccell in single_value_cells:
-        if make_arc_consistent(grid, ccell, grid[ccell]) == False:
+    single_value_cells = [cell for cell, value in grid.items() if len(value) == 1]
+    for other_cell in single_value_cells:
+        if not make_arc_consistent(grid, other_cell, grid[other_cell]):
             return False
     return True
 
@@ -144,17 +142,6 @@ slist[16]= '.6.5.1.9.1...9..539....7....4.8...7.......5.8.817.5.3.....5.2.......
 slist[17]= '..5...987.4..5...1..7......2...48....9.1.....6..2.....3..6..2.......9.7.......5..'
 slist[18]= '3.6.7...........518.........1.4.5...7.....6.....2......2.....4.....8.3.....5.....'
 slist[19]= '1.....3.8.7.4..............2.3.1...........958.........5.6...7.....8.2...4.......'
-
-
-
-grid = parse_string_to_dict(slist[2])
-
-display(grid)
-r = solve(grid)
-print(r)
-display(r)
-exit()
-
 
 for i,sudo in enumerate(slist):
     print('*** sudoku {0} ***'.format(i))
