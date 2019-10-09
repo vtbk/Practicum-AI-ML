@@ -81,6 +81,27 @@ def gradientDescent(X, y, theta, alpha, num_iters):
     m,n = X.shape
 
     # YOUR CODE HERE
+    theta = theta[0]
+    for i in range(num_iters):
+
+        
+        guess = sum([theta[0] + theta[1] * x[1] for x in X])
+        error = guess - sum(y)
+        
+        temp = 0
+        for z, x in enumerate(X):
+            
+            g = theta[0] + theta[1] * x[1]
+            e = g - y[z]
+            temp += e * x[1]
+        
+        theta[0] = theta[0] - alpha * ((1.0/m) * error)
+        theta[1] = theta[1] - alpha * ((1.0/m) * temp)
+
+        print(theta)
+
+
+
 
     # aan het eind van deze loop retourneren we de nieuwe waarde van theta
     # (wat is de dimensionaliteit van theta op dit moment?).
