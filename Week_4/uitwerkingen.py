@@ -57,9 +57,6 @@ def computeCost(X, y, theta):
     J = differences / (len(X) * 2)
     return float(J)
     
-
-
-
 def gradientDescent(X, y, theta, alpha, num_iters):
     #OPGAVE 3
     # In deze opgave wordt elke parameter van theta num_iter keer geüpdate om de optimale waarden
@@ -81,31 +78,20 @@ def gradientDescent(X, y, theta, alpha, num_iters):
     m,n = X.shape
 
     # YOUR CODE HERE
-    theta = theta[0]
+    theta = theta[0] #Haven't found out why theta was passed in such a format, but outer array seems useless
     for i in range(num_iters):
+        expected = sum([theta[0] + theta[1] * x[1] for x in X]) #total value according to current hypotheses
+        difference = expected - sum(y) #total difference between hypothesis and reality
 
-        
-        guess = sum([theta[0] + theta[1] * x[1] for x in X])
-        error = guess - sum(y)
-        
-        temp = 0
-        for z, x in enumerate(X):
-            
-            g = theta[0] + theta[1] * x[1]
-            e = g - y[z]
-            temp += e * x[1]
-        
-        theta[0] = theta[0] - alpha * ((1.0/m) * error)
-        theta[1] = theta[1] - alpha * ((1.0/m) * temp)
+        #Don't need to do theta0 * x[0]  (so just alpha * diff) because it will always be x 1 anyways   
+        #Probably possible to have an array with two gradients and to just multiply in one line
+        gradient = 1/m * sum((theta[0] + theta[1] * x[1] - y[i]) * x[1] for i, x in enumerate(X))
 
-        print(theta)
-
-
-
+        theta[0] = theta[0] - alpha * ((1/m) * difference)
+        theta[1] = theta[1] - alpha * gradient
 
     # aan het eind van deze loop retourneren we de nieuwe waarde van theta
     # (wat is de dimensionaliteit van theta op dit moment?).
-
     return theta
 
 def contourPlot(X, y):
@@ -127,8 +113,13 @@ def contourPlot(X, y):
     T1, T2 = np.meshgrid(t1, t2)
 
     J_vals = np.zeros( (len(t2), len(t2)) )
-
+   
     #YOUR CODE HERE 
+    for x, theta_1 in enumerate(t1):
+        for z, theta_2 in enumerate(t2):
+            cost = computeCost(X, y, np.array([theta_1, theta_2]))
+            J_vals[x,z] = cost
+
 
     surf = ax.plot_surface(T1, T2, J_vals, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
