@@ -143,14 +143,10 @@ def sigmoidGradient(z):
 
 # ==== OPGAVE 3b ====
 def nnCheckGradients(Theta1, Theta2, X, y): 
-    # Retourneer de gradiënten van Theta1 en Theta2, gegeven de waarden van X en van y
-    # Zie het stappenplan in de opgaven voor een mogelijke uitwerking.
-
     Delta2 = np.zeros(Theta1.shape)
     Delta3 = np.zeros(Theta2.shape)
-    m = X.shape[0] #voorbeeldwaarde; dit moet je natuurlijk aanpassen naar de echte waarde van m
+    m = X.shape[0] 
     
-    predicted = predictNumber(Theta1, Theta2, X)
     y = get_y_matrix(y, y.shape[1])
 
     for i in range(m): 
@@ -160,54 +156,26 @@ def nnCheckGradients(Theta1, Theta2, X, y):
         a2 = np.insert(a2, 0, 1, axis=0)
         a3 = sigmoid(np.dot(a2, Theta2.T))
 
-        #backprop
-        s = [0, 0, 0, 0]
-        s[3] = predicted[i] - y[i] #or a3 - y[i]
-        s[2] = np.dot(Theta2.T, s[3])[:1] * sigmoidGradient(np.dot(a1, Theta1.T))
+        #Backpropagation
+        S3 = a3 - y[i]
+        S2 = np.dot(Theta2.T, S3)[:1] * sigmoidGradient(np.dot(a1, Theta1.T))
+        Delta2 = Delta2 + np.dot(S2.reshape((S2.shape[0], 1)), a1.reshape((1, a1.shape[0])))
+        Delta3 = Delta3 + np.dot(S3.reshape((S3.shape[0], 1)), a2.reshape((1, a2.shape[0])))
 
-        s[2] = s[2].reshape((s[2].shape[0], 1))
-        a1 = a1.reshape((1, a1.shape[0]))
-        Delta2 = Delta2 + np.dot(s[2], a1)
-
-        s[3] = s[3].reshape((s[3].shape[0], 1))
-        a2 = a2.reshape((1, a2.shape[0]))
-
-        Delta3 = Delta3 + np.dot(s[3], a2)
-        
         # print(Delta3[3])
-        # print("Shape of {} is {}".format('s[3]', s[3].shape))
-        # print("Shape of {} is {}".format('s[2]', s[2].shape))
+        # print("Shape of {} is {}".format('s3', S3.shape))
+        # print("Shape of {} is {}".format('s2', S2.shape))
         # print("Shape of {} is {}".format('a1', a1.shape))
         # print("Shape of {} is {}".format('a2', a2.shape))
         # print("Shape of {} is {}".format('a3', a3.shape))
-        # # print("Shape of {} is {}".format('o', o.shape))
-        # # print("Shape of {} is {}".format('z', z.shape))
         # print("Shape of {} is {}".format('Theta2', Theta1.shape))
         # print("Shape of {} is {}".format('Theta2', Theta2.shape))
         # print("Shape of {} is {}".format('Delta2', Delta2.shape))
         # print("Shape of {} is {}".format('Delta3', Delta3.shape))
         # exit()
         
-        
     Delta2_grad = Delta2 / m
     Delta3_grad = Delta3 / m
     
     return Delta2_grad, Delta3_grad
 
-
-'''
-        s = [0, 0, 0, 0]
-        s[3] = predicted[i] - y[i] #or a3 - y[i]
-        s[2] = np.dot(Theta2.T, s[3])[:1] * sigmoidGradient(np.dot(a1, Theta1.T))
-
-        o = s[2].reshape((s[2].shape[0], 1))
-        z = a1[:1].reshape((1, a1[:1].shape[0]))
-        #Delta2 = Delta2 + np.outer(s[2], a1.T)
-        Delta2 = Delta2 + np.dot(o, z.T)
-        print("Shape of {} is {}".format('s[3]', s[3].shape))
-
-        #Delta3 = Delta3 + np.outer(s[3], a2.T)
-        Delta3 = Delta3 + np.vdot(s[3].T, a2)
-        
-        print(Delta3[-1])
-'''
