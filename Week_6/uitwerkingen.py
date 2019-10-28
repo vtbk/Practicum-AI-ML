@@ -46,9 +46,7 @@ def buildModel():
 def confMatrix(labels, pred):
     # Retourneer de econfusion matrix op basis van de gegeven voorspelling (pred) en de actuele
     # waarden (labels). Check de documentatie van tf.math.confusion_matrix
-    
-    # YOUR CODE HERE
-    pass
+    return tf.math.confusion_matrix(labels, pred)
 
 # OPGAVE 2b
 def confEls(conf, labels): 
@@ -57,13 +55,25 @@ def confEls(conf, labels):
     # waarden van de TP, FP, FN en TN conform de berekening in de opgave. Maak vervolgens gebruik van
     # de methodes zip() en list() om een list van len(labels) te retourneren, waarbij elke tupel 
     # als volgt is gedefinieerd:
-
     #     (categorie:string, tp:int, fp:int, fn:int, tn:int)
- 
+    
     # Check de documentatie van numpy diagonal om de eerste waarde te bepalen.
  
-    # YOUR CODE HERE
-    pass
+    from collections import namedtuple
+    cat_score = namedtuple("cat_score", ['category', 'tp', 'fp', 'fn', 'tn'])
+    scores = []
+
+    # Check de documentatie van numpy diagonal om de eerste waarde te bepalen. 
+    #https://stackoverflow.com/a/43331484
+    confusion_matrix = conf
+    FP = confusion_matrix.sum(axis=0) - np.diag(confusion_matrix)  
+    FN = confusion_matrix.sum(axis=1) - np.diag(confusion_matrix)
+    TP = np.diag(confusion_matrix)
+    TN = confusion_matrix.sum() - (FP + FN + TP)
+
+    for label, fp, fn, tp, tn in zip(labels, FP, FN, TP, TN):
+        scores.append(cat_score(label, tp, fp, fn, tn))
+    return scores
 
 # OPGAVE 2c
 def confData(metrics):
@@ -74,13 +84,17 @@ def confData(metrics):
 
     # VERVANG ONDERSTAANDE REGELS MET JE EIGEN CODE
     
-    tp = 1
-    fp = 1
-    fn = 1
-    tn = 1
+    tp = sum([score.tp for score in metrics])
+    fp = sum([score.fp for score in metrics])
+    fn = sum([score.fn for score in metrics])
+    tn = sum([score.tn for score in metrics])
 
     # BEREKEN HIERONDER DE JUISTE METRIEKEN EN RETOURNEER DIE 
     # ALS EEN DICTIONARY
 
-    rv = {'tpr':0, 'ppv':0, 'tnr':0, 'fpr':0 }
+    tpr = tp / (tp + fn) #git, verify whether correct
+    ppv = tp / (tp + fp)
+    tnr = tn / (tn + fp)
+    fpr = fp / (fp + tn)
+    rv = {'tpr':tpr, 'ppv':ppv, 'tnr':tnr, 'fpr':fpr }
     return rv

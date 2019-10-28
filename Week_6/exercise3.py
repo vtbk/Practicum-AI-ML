@@ -7,6 +7,8 @@ import sys
 
 from uitwerkingen import *
 
+
+tf.compat.v1.disable_eager_execution()
 # ==============================================
 # HELPER FUNCTIES
 def plotMatrix(data):
@@ -47,9 +49,11 @@ print ("Grootte van de labels: {}".format(len(labels)))
 # print ("Het resultaat zou gelijk moeten zijn aan:")
 # print (r)
 
-# train_images = scaleData(train_images)
-# test_images = scaleData(test_images)
+train_images = scaleData(train_images)
+test_images = scaleData(test_images)
 
+print(train_images.shape)
+print(train_labels.shape)
 
 # ===============  OPGAVE 1c ======================
 print ("")
@@ -61,19 +65,23 @@ else:
     print(model.summary())
     print(train_images.shape)
     print ("Trainen van het model...") 
-    model.fit(train_images, train_labels, epochs=6)
+    model.fit(train_images, train_labels, epochs=100)
     print ("Training afgerond.")
-    model.save('cached_model.h5')
-exit() 
+    model.save('cached_model_100_epochs.h5') #Only works when eager execution is enabled (disabled because required by the eval() call later on)
+
 # ===============  OPGAVE 2 ======================
 print ("")
 print ("Bepalen van de confusion matrix van het getrainde netwerk.")
-pred = np.argmax(model.predict(test_images), axis=1)
+
+pred = np.argmax(model.predict(test_images), axis=1)  #why axis 1
+print(test_labels)
+exit()
 cm = confMatrix(test_labels, pred)
 
-sess = tf.Session()
-with sess.as_default():
-    data = cm.eval() 
+
+sess = tf.compat.v1.Session()
+with sess.as_default(): 
+   data = cm.eval() 
 
 print ("De confusion matrix:") 
 if (len(sys.argv)>1 and sys.argv[1]=='skip') :
