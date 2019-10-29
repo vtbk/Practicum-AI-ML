@@ -4,12 +4,6 @@ from scipy.sparse import csr_matrix
 
 # ==== OPGAVE 1 ====
 def plotNumber(nrVector):
-    # Let op: de manier waarop de data is opgesteld vereist dat je gebruik maakt
-    # van de Fortran index-volgorde – de eerste index verandert het snelst, de 
-    # laatste index het langzaamst; als je dat niet doet, wordt het plaatje 
-    # gespiegeld en geroteerd. Zie de documentatie op 
-    # https://docs.scipy.org/doc/numpy/reference/generated/numpy.reshape.html
-    
     nrVector = nrVector.reshape((20, 20), order = 'F')
     plt.matshow(nrVector)
     plt.show()
@@ -17,13 +11,8 @@ def plotNumber(nrVector):
 
 # ==== OPGAVE 2a ====
 def sigmoid(z):
-    # Maak de code die de sigmoid van de input z teruggeeft. Zorg er hierbij
-    # voor dat de code zowel werkt wanneer z een getal is als wanneer z een
-    # vector is.
-    # Maak gebruik van de methode exp() in NumPy.
     return 1 / (1 + np.exp(-z))
     
-
 
 # ==== OPGAVE 2b ====
 def get_y_matrix(y, m):
@@ -34,16 +23,14 @@ def get_y_matrix(y, m):
     # y_i=10, dan is regel i in de matrix [0,0,...1] (in dit geval is de breedte
     # van de matrix 10 (0-9), maar de methode moet werken voor elke waarde van 
     # y en m
+    #https://cmdlinetips.com/2018/03/sparse-matrices-in-python-with-scipy/
     
-    ####TODO FIX THIS FIX THIS FIX THIS ####
-    cols = y.T[0] #Get the data
-    cols = cols-1 #Remove 1 from all values (because 1 has to go on index 0, 2 on 1 etc...)
-    rows = [i for i in range(len(cols))] #Get the all the values
-    data = [1 for _ in range(len(cols))] #Get a similair matrix filled with 1's
-    w = max(cols)+1 # arrays zijn zero-based
-    y_vec = csr_matrix((data, (rows, cols)), shape=(len(rows), w)).toarray()
-    return y_vec
-
+    cols = y.T[0] 
+    cols = cols - 1 #The values decreased by one correspond to the index of the 1 in the to-be-created matrix
+    rows = [i for i in range(m)] 
+    data = [1 for _ in range(m)] #The actual non-zero data consists of m ones 
+    width = max(cols) + 1
+    return csr_matrix((data, (rows, cols)), shape=(m, width)).toarray()
 
 # ==== OPGAVE 2c ==== 
 # ===== deel 1: =====
@@ -69,32 +56,16 @@ def predictNumber(Theta1, Theta2, X):
 
     # Voeg enen toe aan het begin van elke stap en reshape de uiteindelijke
     # vector zodat deze dezelfde dimensionaliteit heeft als y in de exercise.
-
-    #https://blog.quantinsti.com/forward-propagation-neural-networks/
-    
-
-
-    X = np.insert(X, 0, 1, axis=1)
-    a2 = sigmoid(np.dot(X, Theta1.T))
+    a1 = np.insert(X, 0, 1, axis=1)
+    a2 = sigmoid(np.dot(a1, Theta1.T))
     a2 = np.insert(a2, 0, 1, axis=1)
-    r = sigmoid(np.dot(a2, Theta2.T))
-    #print(sigmoid(r))
-    return r
-
+    return sigmoid(np.dot(a2, Theta2.T))
+    
 
 # ===== deel 2: =====
 def computeCost(Theta1, Theta2, X, y):
-    # Deze methode maakt gebruik van de methode predictNumber() die je hierboven hebt
-    # geïmplementeerd. Hier wordt het voorspelde getal vergeleken met de werkelijk 
-    # waarde (die in de parameter y is meegegeven) en wordt de totale kost van deze
-    # voorspelling (dus met de huidige waarden van Theta1 en Theta2) berekend en
-    # geretourneerd.
-    # Let op: de y die hier binnenkomt is de m×1-vector met waarden van 1...10. 
-    # Maak gebruik van de methode get_y_matrix() die je in opgave 2a hebt gemaakt
-    # om deze om te zetten naar een matrix. 
     y = get_y_matrix(y, y.shape[0])
     predictions = predictNumber(Theta1, Theta2, X)
-
     #Calculate error margin of predicted chance 
     error = lambda chance, pred_chance: -1 * chance * np.log(pred_chance) - (1 - chance) * np.log(1 - pred_chance)
     #For every single prediction: check error margin of predicted chance for all properties (i.e. num 0-9)
@@ -102,42 +73,8 @@ def computeCost(Theta1, Theta2, X, y):
     cost = total_error / X.shape[0]
     return cost
     
-'''
-    y = get_y_matrix(y, y.shape[0])
-    predictions = predictNumber(Theta1, Theta2, X)
-
-    #calculate error margin of predicted chance vs actual chance
-    error = lambda chance, pred_chance: -1 * chance * np.log(pred_chance) - (1 - chance) * np.log(1 - pred_chance)
-    #For every single prediction: check error margin of predicted chance for all properties (i.e. num 0-9)
-    total_error = np.array([error(ch, pr) for c, p in zip(y, predictions) for ch, pr in zip(c, p)]).sum()
-    cost = total_error / X.shape[0]
-    return cost
-    
-    total_cost = 0
-    for correct, prediction in zip(y_matrix, predictions):
-        prediction_cost = 0
-        for chance, predicted_chance in zip(correct, prediction):
-            prediction_cost +=  -1 * chance * np.log(predicted_chance) - (1 - chance) * np.log(1 - predicted_chance)
-        total_cost += prediction_cost
-
-    return total_cost/X.shape[0]
-
-    cost = 0
-    for index, pred in enumerate(predictions):
-        for i, pixel in enumerate(pred):
-            correct_pixel = y_matrix[index][i]
-
-            tcost = -1 * correct_pixel * np.log(pixel) - (1 - correct_pixel) * np.log(1 - pixel)
-            print(tcost)
-            cost += tcost #probably nicer to calculate cost per pred instead of pixel of pred
-    print(cost / 5000)
-    return cost/5000
-'''
 # ==== OPGAVE 3a ====
 def sigmoidGradient(z): 
-    # Retourneer hier de waarde van de afgeleide van de sigmoïdefunctie.
-    # Zie de opgave voor de exacte formule. Zorg ervoor dat deze werkt met
-    # scalaire waarden en met vectoren.
     return sigmoid(z) * (1 - sigmoid(z))
     
 
@@ -146,8 +83,7 @@ def nnCheckGradients(Theta1, Theta2, X, y):
     Delta2 = np.zeros(Theta1.shape)
     Delta3 = np.zeros(Theta2.shape)
     m = X.shape[0] 
-    
-    y = get_y_matrix(y, y.shape[1])
+    y = get_y_matrix(y, m)
 
     for i in range(m): 
         a1 = X[i]
