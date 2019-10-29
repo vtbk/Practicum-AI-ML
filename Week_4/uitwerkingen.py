@@ -9,17 +9,8 @@ def drawGraph(data):
     # Maak een scatter-plot van de data die als parameter aan deze functie wordt meegegeven. Deze data
     # is een twee-dimensionale matrix met in de eerste kolom de grootte van de steden, in de tweede
     # kolom de winst van de vervoerder. Zet de eerste kolom op de x-as en de tweede kolom op de y-as.
-    # Je kunt hier gebruik maken van de mogelijkheid die Python biedt om direct een waarde toe te kennen
-    # aan meerdere variabelen, zoals in het onderstaande voorbeeld:
 
-    #     l = [ 3, 4 ]
-    #     x,y = l      ->  x = 3, y = 4
-
-    # Om deze constructie in dit specifieke geval te kunnen gebruiken, moet de data-matrix wel eerst
-    # roteren (waarom?).
-    # Maak gebruik van pytplot.scatter om dit voor elkaar te krijgen.
-
-    #YOUR CODE HERE
+   
     data = np.rot90(data, 3)  #Rotate 270 degrees so that data[0] represents x and data[1] represents y    
     x, y = data
     plt.scatter(x, y)
@@ -48,7 +39,6 @@ def computeCost(X, y, theta):
 
     J = 0
 
-    # YOUR CODE HERE
     predictions = [x[0] * theta[0] + x[1] * theta[1] for x in X]
     differences = 0
     for index, value in enumerate(predictions):
@@ -78,13 +68,13 @@ def gradientDescent(X, y, theta, alpha, num_iters):
     m,n = X.shape
 
     # YOUR CODE HERE
-    theta = theta[0] #Haven't found out why theta was passed in such a format, but outer array seems useless
-    for i in range(num_iters):
-        expected = sum([theta[0] + theta[1] * x[1] for x in X]) #total value according to current hypotheses
-        difference = expected - sum(y) #total difference between hypothesis and reality
+    theta = theta[0] 
+    for _ in range(num_iters):
+        predicted = sum([theta[0] + theta[1] * x[1] for x in X]) #total value according to current hypotheses
+        difference = predicted - sum(y) #total difference between hypothesis and reality
 
         #Don't need to do theta0 * x[0]  (so just alpha * diff) because it will always be x 1 anyways   
-        #Probably possible to have an array with two gradients and to just multiply in one line
+        #TODO: Probably possible to create a (2,1) gradient and update thetas in one single line
         gradient = 1/m * sum((theta[0] + theta[1] * x[1] - y[i]) * x[1] for i, x in enumerate(X))
 
         theta[0] = theta[0] - alpha * ((1/m) * difference)
