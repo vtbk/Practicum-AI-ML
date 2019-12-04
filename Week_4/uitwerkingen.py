@@ -5,16 +5,27 @@ from matplotlib import cm
 import matplotlib.mlab as mlab
 
 def drawGraph(data):
+    #https://www.youtube.com/watch?v=x06nL__ECpg
+    #https://www.youtube.com/watch?v=Fpbf2PzsiNc
     #OPGAVE 1
     # Maak een scatter-plot van de data die als parameter aan deze functie wordt meegegeven. Deze data
     # is een twee-dimensionale matrix met in de eerste kolom de grootte van de steden, in de tweede
     # kolom de winst van de vervoerder. Zet de eerste kolom op de x-as en de tweede kolom op de y-as.
+    # Je kunt hier gebruik maken van de mogelijkheid die Python biedt om direct een waarde toe te kennen
+    # aan meerdere variabelen, zoals in het onderstaande voorbeeld:
 
-   
-    data = np.rot90(data, 3)  #Rotate 270 degrees so that data[0] represents x and data[1] represents y    
-    x, y = data
+    #     l = [ 3, 4 ]
+    #     x,y = l      ->  x = 3, y = 4
+
+    # Om deze constructie in dit specifieke geval te kunnen gebruiken, moet de data-matrix wel eerst
+    # roteren (waarom?).
+    # Maak gebruik van pytplot.scatter om dit voor elkaar te krijgen.
+
+    #YOUR CODE HERE
+    x, y = data.T
     plt.scatter(x, y)
     plt.show()
+
 
 
 def computeCost(X, y, theta):
@@ -37,16 +48,19 @@ def computeCost(X, y, theta):
     #    4. kwadrateer dit verschil
     #    5. tal al deze kwadraten bij elkaar op en deel dit door twee keer het aantal datapunten
 
+
     J = 0
 
-    predictions = [x[0] * theta[0] + x[1] * theta[1] for x in X]
-    differences = 0
-    for index, value in enumerate(predictions):
-        diff = y[index] - value
-        differences += diff * diff
-    J = differences / (len(X) * 2)
-    return float(J)
-    
+    # YOUR CODE HERE
+    m = X.shape[0]
+    predictions = np.dot(X, theta)
+    error = predictions - y
+    error = error ** 2
+    J =  1 / (m * 2) * sum(error)
+    return J[0]
+
+
+
 def gradientDescent(X, y, theta, alpha, num_iters):
     #OPGAVE 3
     # In deze opgave wordt elke parameter van theta num_iter keer geüpdate om de optimale waarden
@@ -67,19 +81,17 @@ def gradientDescent(X, y, theta, alpha, num_iters):
 
     m,n = X.shape
 
+    #https://stackoverflow.com/questions/22053050/difference-between-numpy-array-shape-r-1-and-r
+    
     # YOUR CODE HERE
-    theta = theta[0] 
     for _ in range(num_iters):
-        predicted = sum([theta[0] + theta[1] * x[1] for x in X]) #total value according to current hypotheses
-        difference = predicted - sum(y) #total difference between hypothesis and reality
+        prediction = np.dot(X, theta.T)
+        error = prediction - y
 
-        #Don't need to do theta0 * x[0]  (so just alpha * diff) because it will always be x 1 anyways   
-        #TODO: Probably possible to create a (2,1) gradient and update thetas in one single line
-        gradient = 1/m * sum((theta[0] + theta[1] * x[1] - y[i]) * x[1] for i, x in enumerate(X))
-
-        theta[0] = theta[0] - alpha * ((1/m) * difference)
-        theta[1] = theta[1] - alpha * gradient
-
+        #Transpose (97, 1) error naar (1, 97), vermenigvuldig deze met i-de waarde van X(97, 2) -> (1, 97) resultaat -> sum op axis 1
+        theta[0, 0] = theta[0, 0] - (alpha * (1/m)) * np.sum(error.T * X[:, 0], axis=1)
+        theta[0, 1] = theta[0, 1] - (alpha * (1/m)) * np.sum(error.T * X[:, 1], axis=1)
+    
     # aan het eind van deze loop retourneren we de nieuwe waarde van theta
     # (wat is de dimensionaliteit van theta op dit moment?).
     return theta
@@ -103,13 +115,12 @@ def contourPlot(X, y):
     T1, T2 = np.meshgrid(t1, t2)
 
     J_vals = np.zeros( (len(t2), len(t2)) )
-   
+
     #YOUR CODE HERE 
     for x, theta_1 in enumerate(t1):
         for z, theta_2 in enumerate(t2):
-            cost = computeCost(X, y, np.array([theta_1, theta_2]))
-            J_vals[x,z] = cost
-
+            theta = np.array([theta_1, theta_2]).reshape((2,1)) #Anders shape (2, ), werkt incorrect met de operaties in computeCost
+            J_vals[x, z] = computeCost(X, y, theta)
 
     surf = ax.plot_surface(T1, T2, J_vals, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
