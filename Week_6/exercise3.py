@@ -7,7 +7,6 @@ import sys
 
 from uitwerkingen import *
 
-
 tf.compat.v1.disable_eager_execution()
 # ==============================================
 # HELPER FUNCTIES
@@ -15,7 +14,6 @@ def plotMatrix(data):
     plt.figure()
     plt.matshow(data)
     plt.show()
-
 
 # ==== Laden van de data en zetten van belangrijke variabelen ====
 print ("Laden van de data...")
@@ -32,66 +30,56 @@ print ("Grootte van de labels: {}".format(len(labels)))
 
 # ===============  OPGAVE 1 ======================
 # ===============  OPGAVE 1a ======================
-# print ("Plotten van een willekeurig plaatje uit de trainings-dataset")
-# if (len(sys.argv)>1 and sys.argv[1]=='skip') :
-#     print ("Slaan we over")
-# else:
-#     rnd = randint(0, train_images.shape[0])
-#     hyp = labels[train_labels[rnd]]
-#     plotImage(train_images[rnd], hyp)
+print ("Plotten van een willekeurig plaatje uit de trainings-dataset")
+if (len(sys.argv)>1 and sys.argv[1]=='skip') :
+    print ("Slaan we over")
+else:
+    rnd = randint(0, train_images.shape[0])
+    hyp = labels[train_labels[rnd]]
+    plotImage(train_images[rnd], hyp)
 
 # ===============  OPGAVE 1b ======================
-# X = np.array( ([1,2,3,4],[2,2,4,4],[4,3,2,1]) )
-# r = X/4
-# print ("Aanroepen van de methode scaleData met de matrix:")
-# print (X)
-# print (scaleData(X))
-# print ("Het resultaat zou gelijk moeten zijn aan:")
-# print (r)
+X = np.array( ([1,2,3,4],[2,2,4,4],[4,3,2,1]) )
+r = X/4
+print ("Aanroepen van de methode scaleData met de matrix:")
+print (X)
+print (scaleData(X))
+print ("Het resultaat zou gelijk moeten zijn aan:")
+print (r)
 
 train_images = scaleData(train_images)
 test_images = scaleData(test_images)
 
-print(train_images.shape)
-print(train_labels.shape)
-
 # ===============  OPGAVE 1c ======================
 print ("")
 print ("Aanmaken van het model.")
-if (len(sys.argv)>1 and sys.argv[1]=='cached') :
-    model = tf.keras.models.load_model('cached_model.h5')
+if (len(sys.argv)>1 and sys.argv[1]=='saved') :
+    model = tf.keras.models.load_model('saved_model_10_epochs.h5')
 else: 
     model = buildModel()
-    print(model.summary())
     print(train_images.shape)
     print ("Trainen van het model...") 
-    model.fit(train_images, train_labels, epochs=100)
+    model.fit(train_images, train_labels, epochs=10)
     print ("Training afgerond.")
-    model.save('cached_model_100_epochs.h5') #Only works when eager execution is enabled (disabled because required by the eval() call later on)
+    model.save('saved_model_10_epochs.h5') #Only works when eager execution is enabled (disabled because required by the eval() call later on)
 
 # ===============  OPGAVE 2 ======================
 print ("")
 print ("Bepalen van de confusion matrix van het getrainde netwerk.")
 
-pred = np.argmax(model.predict(test_images), axis=1)  #why axis 1
-print(test_labels)
-exit()
+pred = np.argmax(model.predict(test_images), axis=1)  
 cm = confMatrix(test_labels, pred)
-
 
 sess = tf.compat.v1.Session()
 with sess.as_default(): 
    data = cm.eval() 
 
 print ("De confusion matrix:") 
-if (len(sys.argv)>1 and sys.argv[1]=='skip') :
+if (len(sys.argv)>1 and sys.argv[2]=='skip') :
     print ("Tekenen slaan we over")
 else:
     plotMatrix(data)
   
-print (data)
-print (data.shape)
-
 print ("Bepalen van de tp, tn, fp, fn")
 metrics = confEls(data,labels)
 print (metrics)

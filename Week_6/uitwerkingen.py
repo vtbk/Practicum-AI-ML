@@ -8,7 +8,6 @@ def plotImage(img, label):
     # Deze methode krijgt een matrix mee (in img) en een label dat correspondeert met het 
     # plaatje dat in de matrix is weergegeven. Zorg ervoor dat dit grafisch wordt weergegeven.
     # Maak gebruik van plt.cm.binary voor de cmap-parameter van plt.imgshow.
-
     plt.imshow(img, cmap=plt.cm.binary)
     plt.xlabel(label)
     plt.show()
@@ -20,7 +19,7 @@ def scaleData(X):
     # alle maximal waarde die in de matrix voorkomt.
     # Deel alle elementen in de matrix 'element wise' door de grootste waarde in deze matrix.
     max_val = np.amax(X)
-    return np.array([val / max_val for val in X])
+    return np.array(X / max_val)
     
 # OPGAVE 1c
 def buildModel():
@@ -34,7 +33,7 @@ def buildModel():
     from keras import Sequential
     from keras import layers
     model = Sequential()
-    model.add(layers.Flatten(input_shape=(28,28)))
+    model.add(layers.Flatten(input_shape=(28,28))) 
     model.add(layers.Dense(784))
     model.add(layers.Dense(128, activation='relu'))
     model.add(layers.Dense(10, activation='softmax'))
@@ -65,11 +64,17 @@ def confEls(conf, labels):
 
     # Check de documentatie van numpy diagonal om de eerste waarde te bepalen. 
     #https://stackoverflow.com/a/43331484
-    confusion_matrix = conf
-    FP = confusion_matrix.sum(axis=0) - np.diag(confusion_matrix)  
-    FN = confusion_matrix.sum(axis=1) - np.diag(confusion_matrix)
-    TP = np.diag(confusion_matrix)
-    TN = confusion_matrix.sum() - (FP + FN + TP)
+
+    TP = np.diag(conf)
+    FP = conf.sum(axis=0) - np.diag(conf)
+    FN = conf.sum(axis=1) - np.diag(conf)
+    TN = conf.sum() - (FP + FN + TP)
+    
+    # print(confusion_matrix.sum(axis=1))
+    # print(confusion_matrix.sum(axis=0))
+    # print(FP)
+    # print(FN)
+    # print(TN)
 
     for label, fp, fn, tp, tn in zip(labels, FP, FN, TP, TN):
         scores.append(cat_score(label, tp, fp, fn, tn))
@@ -83,7 +88,6 @@ def confData(metrics):
     # vorm van een dictionary (de scaffold hiervan is gegeven).
 
     # VERVANG ONDERSTAANDE REGELS MET JE EIGEN CODE
-    
     tp = sum([score.tp for score in metrics])
     fp = sum([score.fp for score in metrics])
     fn = sum([score.fn for score in metrics])
@@ -91,8 +95,7 @@ def confData(metrics):
 
     # BEREKEN HIERONDER DE JUISTE METRIEKEN EN RETOURNEER DIE 
     # ALS EEN DICTIONARY
-
-    tpr = tp / (tp + fn) #git, verify whether correct
+    tpr = tp / (tp + fn) 
     ppv = tp / (tp + fp)
     tnr = tn / (tn + fp)
     fpr = fp / (fp + tn)
